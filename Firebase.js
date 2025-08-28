@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -19,6 +19,17 @@ export const auth = getAuth(app);
 export const provider = new GoogleAuthProvider();
 
 // Auth functions
-export const signInWithGoogle = () => signInWithPopup(auth, provider);
+export const signInWithGoogle = async () => {
+  try {
+    return await signInWithPopup(auth, provider);
+  } catch (error) {
+    if (error.code === 'auth/popup-blocked') {
+      // 팝업이 차단된 경우 리다이렉트 방식 사용
+      console.log('팝업이 차단되어 리다이렉트 방식으로 로그인합니다.');
+      return await signInWithRedirect(auth, provider);
+    }
+    throw error;
+  }
+};
 export const logout = () => signOut(auth);
 export { onAuthStateChanged };
