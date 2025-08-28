@@ -1216,6 +1216,8 @@
         console.error('로그인 오류:', error);
         if (error.code === 'auth/popup-blocked') {
           alert('팝업이 차단되었습니다. 브라우저에서 팝업을 허용하거나, 페이지가 리다이렉트됩니다.');
+        } else if (error.code === 'auth/configuration-not-found') {
+          alert('Firebase 인증이 설정되지 않았습니다.\n\nFirebase Console에서 Google 로그인을 활성화해주세요:\n1. console.firebase.google.com 접속\n2. Authentication > Sign-in method\n3. Google 제공업체 활성화');
         } else {
           alert('로그인 중 오류가 발생했습니다: ' + error.message);
         }
@@ -1269,6 +1271,14 @@
     // 초기화 지연 실행
     setTimeout(() => {
       initFirebaseAuth();
+      
+      // 5초 후에도 로그인이 안되면 오버레이 숨기기 (개발/테스트용)
+      setTimeout(() => {
+        if (!currentUser && document.getElementById('loginOverlay')) {
+          console.log('Firebase 인증 설정이 완료되지 않아 로그인 오버레이를 숨깁니다.');
+          hideLoginOverlay();
+        }
+      }, 5000);
     }, 1000);
 
     // 초기 렌더링
