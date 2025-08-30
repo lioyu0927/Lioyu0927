@@ -38,35 +38,7 @@ export const signInWithGoogle = async() => {
 export const logout = () => signOut(auth);
 export { onAuthStateChanged };
 
-// 사용자 설정 저장 및 불러오기 함수
-export const saveUserSettings = async(userId, settings) => {
-    try {
-        await setDoc(doc(db, 'userSettings', userId), {
-            settings,
-            updatedAt: new Date().toISOString()
-        });
-        return true;
-    } catch (error) {
-        console.error('설정 저장 중 오류 발생:', error);
-        return false;
-    }
-};
-
-export const getUserSettings = async(userId) => {
-    try {
-        const docRef = doc(db, 'userSettings', userId);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-            return docSnap.data().settings;
-        } else {
-            return null; // 기본 설정을 반환하거나 새로운 설정을 생성
-        }
-    } catch (error) {
-        console.error('설정 불러오기 중 오류 발생:', error);
-        return null;
-    }
-};
+// 사용되지 않는 설정 관련 함수 제거
 
 // 사용자 프로필 저장
 export const saveUserProfile = async(userId, profile) => {

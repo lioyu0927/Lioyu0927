@@ -783,22 +783,19 @@
 
     <!-- Firebase integration -->
     <script type="module">
-        import { auth, signInWithGoogle, logout, onAuthStateChanged, saveUserProfile, getAllUserProfiles } from './Firebase.js'; // 전역 함수로 로그인 핸들러 정의 window.handleLogin = async () => { try { const result = await signInWithGoogle(); window.currentUser = result.user;
-        if (typeof window.updateAuthUI === 'function') { window.updateAuthUI(); } if (window.currentUser) { window.myProfile.name = window.currentUser.displayName || window.myProfile.name; window.myProfile.photoUrl = window.currentUser.photoURL || window.myProfile.photoUrl;
-        if (typeof window.saveAndLoadUserProfile === 'function') { await window.saveAndLoadUserProfile(); } if (typeof window.updateProfileAvatar === 'function') { window.updateProfileAvatar(); } } } catch (error) { console.error('로그인 오류:', error); if
-        (error.code === 'auth/popup-blocked') { alert('팝업이 차단되었습니다. 브라우저 설정에서 팝업을 허용해주세요.'); } else { alert('로그인 중 오류가 발생했습니다: ' + error.message); } } }; // 전역 함수로 로그아웃 핸들러 정의 window.handleLogout = async () => { try { await logout(); } catch (error) {
-        console.error('로그아웃 오류:', error); alert('로그아웃 중 오류가 발생했습니다.'); } }; // Firebase 기능을 전역 범위에서 사용할 수 있도록 설정 window.firebaseAuth = { signIn: signInWithGoogle, logout: logout, onAuthStateChanged: onAuthStateChanged, auth: auth }; window.firebaseDB
-        = { saveUserProfile: saveUserProfile, getAllUserProfiles: getAllUserProfiles }; // Firebase가 준비되었음을 알림 window.dispatchEvent(new Event('firebaseInitialized')); // DOMContentLoaded 이벤트 이후에 Firebase 초기화를 알림 document.addEventListener('DOMContentLoaded',
-        () => { window.dispatchEvent(new Event('firebaseInitialized')); });
+        import { auth, signInWithGoogle, logout, onAuthStateChanged, saveUserProfile, getAllUserProfiles } from './Firebase.js'; // 전역 함수로 로그인 핸들러 정의 async function handleLoginImpl() { try { const result = await signInWithGoogle(); window.currentUser = result.user;
+        window.myProfile.name = window.currentUser.displayName || window.myProfile.name; window.myProfile.photoUrl = window.currentUser.photoURL || window.myProfile.photoUrl; await window.saveAndLoadUserProfile(); window.updateProfileAvatar(); window.updateAuthUI();
+        } catch (error) { console.error('로그인 오류:', error); if (error.code === 'auth/popup-blocked') { alert('팝업이 차단되었습니다. 브라우저 설정에서 팝업을 허용해주세요.'); } else { alert('로그인 중 오류가 발생했습니다: ' + error.message); } } } // 전역 함수로 로그아웃 핸들러 정의 async function handleLogoutImpl()
+        { try { await logout(); } catch (error) { console.error('로그아웃 오류:', error); alert('로그아웃 중 오류가 발생했습니다.'); } } // 전역 객체에 Firebase 기능 할당 window.handleLogin = handleLoginImpl; window.handleLogout = handleLogoutImpl; window.firebaseAuth = { auth: auth,
+        signIn: signInWithGoogle, logout: logout, onAuthStateChanged: onAuthStateChanged }; window.firebaseDB = { saveUserProfile: saveUserProfile, getAllUserProfiles: getAllUserProfiles }; // Firebase가 준비되었음을 알림 window.dispatchEvent(new Event('firebaseInitialized'));
     </script>
 
     <script>
         // Firebase 초기화를 기다린 후 인증 초기화
         window.addEventListener('firebaseInitialized', () => {
             console.log('Firebase가 초기화되었습니다.');
-            if (typeof initFirebaseAuth === 'function') {
-                initFirebaseAuth();
-            }
+            initFirebaseAuth();
+            updateAuthUI();
         });
     </script>
 
