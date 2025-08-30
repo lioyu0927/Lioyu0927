@@ -783,7 +783,8 @@
 
     <!-- Firebase integration -->
     <script type="module">
-        import { auth, signInWithGoogle, logout, onAuthStateChanged } from './Firebase.js'; // Make auth functions globally available window.firebaseAuth = { signIn: signInWithGoogle, logout: logout, onAuthStateChanged: onAuthStateChanged, auth: auth };
+        import { auth, signInWithGoogle, logout, onAuthStateChanged, saveUserProfile, getAllUserProfiles } from './Firebase.js'; // Firebase 기능을 전역 범위에서 사용할 수 있도록 설정 window.firebaseAuth = { signIn: signInWithGoogle, logout: logout, onAuthStateChanged: onAuthStateChanged,
+        auth: auth }; window.firebaseDB = { saveUserProfile: saveUserProfile, getAllUserProfiles: getAllUserProfiles };
     </script>
 
     <script>
@@ -1232,7 +1233,7 @@
 
     async function handleLogin() {
       try {
-        const result = await signInWithGoogle();
+        const result = await window.firebaseAuth.signIn();
         currentUser = result.user;
         updateAuthUI();
         // 로그인 성공 시 프로필 정보 업데이트
