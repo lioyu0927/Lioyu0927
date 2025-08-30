@@ -784,7 +784,8 @@
     <!-- Firebase integration -->
     <script type="module">
         import { auth, signInWithGoogle, logout, onAuthStateChanged, saveUserProfile, getAllUserProfiles } from './Firebase.js'; // Firebase 기능을 전역 범위에서 사용할 수 있도록 설정 window.firebaseAuth = { signIn: signInWithGoogle, logout: logout, onAuthStateChanged: onAuthStateChanged,
-        auth: auth }; window.firebaseDB = { saveUserProfile: saveUserProfile, getAllUserProfiles: getAllUserProfiles }; // Firebase가 초기화되었음을 알리는 이벤트 발생 window.dispatchEvent(new Event('firebaseInitialized'));
+        auth: auth }; window.firebaseDB = { saveUserProfile: saveUserProfile, getAllUserProfiles: getAllUserProfiles }; // DOMContentLoaded 이벤트 이후에 Firebase 초기화를 알림 document.addEventListener('DOMContentLoaded', () => { window.dispatchEvent(new Event('firebaseInitialized'));
+        });
     </script>
 
     <script>
