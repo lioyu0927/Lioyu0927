@@ -67,3 +67,37 @@ export const getUserSettings = async(userId) => {
         return null;
     }
 };
+
+// 사용자 프로필 저장
+export const saveUserProfile = async(userId, profile) => {
+    try {
+        await setDoc(doc(db, 'userProfiles', userId), {
+            ...profile,
+            updatedAt: new Date().toISOString()
+        });
+        return true;
+    } catch (error) {
+        console.error('프로필 저장 중 오류 발생:', error);
+        return false;
+    }
+};
+
+// 모든 사용자 프로필 가져오기
+export const getAllUserProfiles = async() => {
+    try {
+        const querySnapshot = await getDocs(collection(db, 'userProfiles'));
+        const profiles = [];
+        querySnapshot.forEach((doc) => {
+            if (doc.exists()) {
+                profiles.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
+            }
+        });
+        return profiles;
+    } catch (error) {
+        console.error('프로필 목록 가져오기 중 오류 발생:', error);
+        return [];
+    }
+};

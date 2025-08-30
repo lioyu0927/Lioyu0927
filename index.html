@@ -783,15 +783,7 @@
 
     <!-- Firebase integration -->
     <script type="module">
-        import { auth, signInWithGoogle, logout, onAuthStateChanged } from './Firebase.js';
-        
-        // Make auth functions globally available
-        window.firebaseAuth = {
-            signIn: signInWithGoogle,
-            logout: logout,
-            onAuthStateChanged: onAuthStateChanged,
-            auth: auth
-        };
+        import { auth, signInWithGoogle, logout, onAuthStateChanged } from './Firebase.js'; // Make auth functions globally available window.firebaseAuth = { signIn: signInWithGoogle, logout: logout, onAuthStateChanged: onAuthStateChanged, auth: auth };
     </script>
 
     <script>
@@ -802,70 +794,10 @@
             age: 20, // 기본값
             region: "서울", // 기본값
             gender: "male", // 기본값
-            artists: ["Parannoul", "검정치마", "Coldplay"] // 초기값
+            artists: [] // 빈 배열로 초기화
         };
 
-        const profiles = [{
-            name: "정우",
-            age: 19,
-            gender: "female",
-            region: "서울",
-            artists: ["Parannoul", "들국화", "IU"]
-        }, {
-            name: "준혁",
-            age: 20,
-            gender: "male",
-            region: "부산",
-            artists: ["검정치마", "BTS"]
-        }, {
-            name: "성준",
-            age: 18,
-            gender: "female",
-            region: "대구",
-            artists: ["미상", "Syncopation", "Coldplay"]
-        }, {
-            name: "지웅",
-            age: 21,
-            gender: "male",
-            region: "인천",
-            artists: ["들국화", "Nirvana", "Parannoul"]
-        }, {
-            name: "지호",
-            age: 22,
-            gender: "female",
-            region: "서울",
-            artists: ["검정치마", "미상", "NewJeans"]
-        }, {
-            name: "태윤",
-            age: 23,
-            gender: "male",
-            region: "광주",
-            artists: ["Syncopation", "Radiohead"]
-        }, {
-            name: "서연",
-            age: 19,
-            gender: "female",
-            region: "부산",
-            artists: ["Parannoul", "검정치마", "Coldplay"]
-        }, {
-            name: "민재",
-            age: 21,
-            gender: "male",
-            region: "대전",
-            artists: ["들국화", "미상"]
-        }, {
-            name: "하린",
-            age: 20,
-            gender: "female",
-            region: "서울",
-            artists: ["Syncopation", "검정치마"]
-        }, {
-            name: "도윤",
-            age: 22,
-            gender: "male",
-            region: "인천",
-            artists: ["미상", "Parannoul", "검정치마"]
-        }];
+        const profiles = []; // 빈 배열로 초기화
 
         let currentFilter = 'all';
         let currentChatUser = null;
@@ -1213,7 +1145,10 @@
     }
 
     // 취향설정 저장 (매칭 업데이트)
-    function saveTasteSettings() {
+    async function saveTasteSettings() {
+      if (currentUser) {
+        await saveAndLoadUserProfile();
+      }
       alert('취향 설정이 저장되었습니다.');
       renderProfiles(); // 매칭 재계산 및 렌더링
       closeSettingsModal();
@@ -1254,11 +1189,45 @@
         // 로그인 상태일 때 로그아웃 버튼만 표시
         loginBtn.style.display = 'none';
         logoutBtn.style.display = 'inline-block';
+        // 사용자 프로필 로드 및 저장
+        saveAndLoadUserProfile();
       } else {
         // 로그아웃 상태일 때 로그인 버튼만 표시
         loginBtn.style.display = 'inline-block';
         logoutBtn.style.display = 'none';
       }
+    }
+
+    // 사용자 프로필 저장 및 다른 사용자 프로필 로드
+    async function saveAndLoadUserProfile() {
+        if (!currentUser) return;
+
+        // 현재 사용자 프로필 저장
+        await window.firebaseDB.saveUserProfile(currentUser.uid, myProfile);
+
+        // 다른 사용자들의 프로필 로드
+        const allProfiles = await window.firebaseDB.getAllUserProfiles();
+        
+        // 현재 사용자를 제외한 다른 사용자들의 프로필만 필터링
+        profiles = allProfiles.filter(profile => profile.id !== currentUser.uid);
+        
+        // 프로필 목록 업데이트
+        renderProfiles();
+    }
+
+    // 프로필 설정 저장 후 다른 사용자들과 매칭 업데이트
+    async function saveProfileSettings() {
+        myProfile.name = document.getElementById('myName').value || myProfile.name;
+        myProfile.photoUrl = document.getElementById('myPhotoUrl').value || myProfile.photoUrl;
+        updateProfileAvatar();
+        
+        // Firebase에 프로필 저장 및 다른 사용자 프로필 새로고침
+        if (currentUser) {
+            await saveAndLoadUserProfile();
+        }
+        
+        alert('프로필 설정이 저장되었습니다.');
+        closeSettingsModal();
     }
 
     async function handleLogin() {
