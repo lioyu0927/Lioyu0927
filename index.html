@@ -1232,15 +1232,20 @@
 
     async function handleLogin() {
       try {
-        if (window.firebaseAuth) {
-          await window.firebaseAuth.signIn();
+        const result = await signInWithGoogle();
+        currentUser = result.user;
+        updateAuthUI();
+        // 로그인 성공 시 프로필 정보 업데이트
+        if (currentUser) {
+          myProfile.name = currentUser.displayName || myProfile.name;
+          myProfile.photoUrl = currentUser.photoURL || myProfile.photoUrl;
+          await saveAndLoadUserProfile();
+          updateProfileAvatar();
         }
       } catch (error) {
         console.error('로그인 오류:', error);
         if (error.code === 'auth/popup-blocked') {
-          alert('팝업이 차단되었습니다. 브라우저에서 팝업을 허용하거나, 페이지가 리다이렉트됩니다.');
-        } else if (error.code === 'auth/configuration-not-found') {
-          alert('Firebase 인증이 설정되지 않았습니다.\n\nFirebase Console에서 Google 로그인을 활성화해주세요:\n1. console.firebase.google.com 접속\n2. Authentication > Sign-in method\n3. Google 제공업체 활성화');
+          alert('팝업이 차단되었습니다. 브라우저 설정에서 팝업을 허용해주세요.');
         } else {
           alert('로그인 중 오류가 발생했습니다: ' + error.message);
         }
