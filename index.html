@@ -783,7 +783,15 @@
 
     <!-- Firebase integration -->
     <script type="module">
-        import { auth, signInWithGoogle, logout, onAuthStateChanged } from './Firebase.js'; // Make auth functions globally available window.firebaseAuth = { signIn: signInWithGoogle, logout: logout, onAuthStateChanged: onAuthStateChanged, auth: auth };
+        import { auth, signInWithGoogle, logout, onAuthStateChanged } from './Firebase.js';
+        
+        // Make auth functions globally available
+        window.firebaseAuth = {
+            signIn: signInWithGoogle,
+            logout: logout,
+            onAuthStateChanged: onAuthStateChanged,
+            auth: auth
+        };
     </script>
 
     <script>
